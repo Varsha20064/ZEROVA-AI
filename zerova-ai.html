@@ -6,7 +6,6 @@
 <title>ZEROVA AI — Code Vulnerability Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   /* ─── DESIGN TOKENS ─────────────────────────────────────── */
   :root {
@@ -17,8 +16,8 @@
     --muted:     #1c2d42;
     --text:      #e2e8f4;
     --sub:       #6b7fa3;
-    --accent:    #00f0c0;
-    --accent2:   #7b5cfa;
+    --accent:    #00f0c0;   /* zerova teal */
+    --accent2:   #7b5cfa;   /* electric violet */
     --danger:    #ff4566;
     --warn:      #ffb340;
     --safe:      #00d68a;
@@ -29,7 +28,8 @@
     --r-lg:      16px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ─── RESET ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
     background: var(--void);
@@ -41,11 +41,12 @@
   a { color: inherit; text-decoration: none; }
   button { cursor: pointer; font-family: inherit; }
 
+  /* ─── SCROLLBAR ──────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--surface); }
   ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-  /* NAV */
+  /* ─── NAV ────────────────────────────────────────────────── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
@@ -83,7 +84,7 @@
   }
   .nav-cta:hover { opacity: 0.85; }
 
-  /* HERO */
+  /* ─── HERO ───────────────────────────────────────────────── */
   .hero {
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -167,7 +168,7 @@
   }
   .stat-lbl { font-size: 12px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
-  /* SCANNER SECTION */
+  /* ─── SCANNER SECTION ────────────────────────────────────── */
   .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
   .section-label {
     font-family: var(--font-util); font-size: 11px; color: var(--accent);
@@ -180,39 +181,19 @@
   }
   .section-sub { font-size: 17px; color: var(--sub); max-width: 520px; }
 
-  /* Scanner tabs */
-  .scanner-tabs {
-    display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--border);
-  }
-  .tab-btn {
-    background: transparent; color: var(--sub); border: none;
-    padding: 12px 16px; font-size: 14px; font-weight: 600;
-    border-bottom: 3px solid transparent; transition: all .2s;
-    cursor: pointer; position: relative; bottom: -1px;
-  }
-  .tab-btn.active {
-    color: var(--accent); border-bottom-color: var(--accent);
-  }
-  .tab-btn:hover { color: var(--text); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
   /* Scanner layout */
   .scanner-layout {
     display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-    margin-top: 24px;
+    margin-top: 48px;
   }
   .scanner-panel {
     background: var(--panel); border: 1px solid var(--border);
     border-radius: var(--r-lg); overflow: hidden;
-    display: flex; flex-direction: column; height: 600px;
   }
   .panel-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 18px; border-bottom: 1px solid var(--border);
     background: rgba(255,255,255,0.02);
-    flex-wrap: wrap;
   }
   .panel-title {
     font-family: var(--font-util); font-size: 11px; color: var(--sub);
@@ -225,62 +206,14 @@
   .dot-green { background: #28c840; }
   .traffic-lights { display: flex; gap: 6px; }
   .code-editor {
-    width: 100%; flex: 1; padding: 18px;
+    width: 100%; min-height: 240px; padding: 18px;
     background: transparent; border: none; outline: none;
     color: var(--text); font-family: var(--font-mono); font-size: 13px;
-    line-height: 1.7; resize: none;
+    line-height: 1.7; resize: vertical;
   }
-  .code-editor::placeholder { color: rgba(107,127,163,0.5); }
-
-  /* File upload area */
-  .upload-area {
-    width: calc(100% - 36px); margin: 18px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    border: 2px dashed var(--border); border-radius: 8px;
-    background: rgba(0,240,192,0.02);
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
-    min-height: 200px;
-    padding: 24px;
-  }
-  .upload-area:hover {
-    border-color: var(--accent);
-    background: rgba(0,240,192,0.06);
-  }
-  .upload-area.dragover {
-    border-color: var(--accent);
-    background: rgba(0,240,192,0.12);
-    transform: scale(0.98);
-  }
-  .upload-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
-  .upload-text { font-size: 14px; color: var(--sub); text-align: center; }
-  .upload-subtext { font-size: 12px; color: var(--muted); margin-top: 6px; }
-  .upload-input { display: none; }
-
-  /* File tree */
-  .file-tree {
-    width: 100%; flex: 1; overflow-y: auto; padding: 12px;
-  }
-  .file-item {
-    padding: 8px 12px; margin: 4px 0; border-radius: 6px;
-    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
-    cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px;
-    font-size: 12px;
-  }
-  .file-item:hover { background: rgba(0,240,192,0.1); border-color: var(--accent); }
-  .file-item.selected { background: rgba(0,240,192,0.15); border-color: var(--accent); }
-  .file-icon { font-size: 14px; }
-  .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .file-size { font-size: 11px; color: var(--muted); }
-  .file-remove { font-size: 12px; color: var(--danger); cursor: pointer; display: none; }
-  .file-item:hover .file-remove { display: block; }
-
   .panel-footer {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 18px; border-top: 1px solid var(--border);
-    flex-wrap: wrap;
   }
   .lang-badge {
     background: var(--muted); color: var(--sub);
@@ -304,14 +237,11 @@
   .btn-scan:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   /* Result panel */
-  .result-body {
-    padding: 20px 18px; flex: 1;
-    overflow-y: auto;
-  }
+  .result-body { padding: 20px 18px; min-height: 240px; }
 
   .result-empty {
-    height: 100%; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+    height: 100%; min-height: 220px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 12px; color: var(--sub);
   }
   .result-empty-icon { font-size: 36px; opacity: 0.3; }
@@ -372,16 +302,157 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-txt { font-family: var(--font-util); font-size: 12px; color: var(--sub); letter-spacing: 0.08em; text-transform: uppercase; }
 
-  /* RESPONSIVE */
+  /* ─── HOW IT WORKS ───────────────────────────────────────── */
+  .how-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .how-inner { max-width: 1200px; margin: 0 auto; }
+  .pipeline {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    margin-top: 56px; position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute; top: 36px; left: calc(10% + 18px); right: calc(10% + 18px);
+    height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 0;
+  }
+  .pipe-step {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    text-align: center; padding: 0 12px; position: relative; z-index: 1;
+  }
+  .pipe-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--panel); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    transition: all .3s;
+  }
+  .pipe-step:hover .pipe-icon {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(0,240,192,0.2);
+  }
+  .pipe-num {
+    font-family: var(--font-util); font-size: 10px; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .pipe-lbl { font-size: 13px; font-weight: 600; }
+  .pipe-desc { font-size: 11px; color: var(--sub); line-height: 1.5; }
+
+  /* ─── MODEL CARDS ────────────────────────────────────────── */
+  .models-section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+  .models-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 48px;
+  }
+  .model-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 24px;
+    transition: all .25s;
+    position: relative; overflow: hidden;
+  }
+  .model-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    opacity: 0; transition: opacity .3s;
+  }
+  .model-card:hover { border-color: rgba(0,240,192,0.3); transform: translateY(-3px); }
+  .model-card:hover::before { opacity: 1; }
+  .mc1::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .mc2::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .mc3::before { background: linear-gradient(90deg, var(--warn), transparent); }
+  .mc4::before { background: linear-gradient(90deg, var(--danger), transparent); }
+  .mc5::before { background: linear-gradient(90deg, var(--safe), transparent); }
+  .mc6::before { background: linear-gradient(90deg, #a78bfa, transparent); }
+
+  .card-icon { font-size: 28px; margin-bottom: 12px; }
+  .card-name {
+    font-family: var(--font-util); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.06em; color: var(--text); margin-bottom: 6px;
+  }
+  .card-type { font-size: 11px; color: var(--accent); margin-bottom: 10px; font-family: var(--font-util); }
+  .card-desc { font-size: 13px; color: var(--sub); line-height: 1.6; }
+  .card-perf {
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; gap: 16px;
+  }
+  .perf-item { display: flex; flex-direction: column; gap: 2px; }
+  .perf-lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.08em; }
+  .perf-val { font-family: var(--font-util); font-size: 16px; font-weight: 700; color: var(--accent); }
+
+  /* ─── CWE MATRIX ─────────────────────────────────────────── */
+  .cwe-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cwe-inner { max-width: 1200px; margin: 0 auto; }
+  .cwe-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    margin-top: 48px;
+  }
+  .cwe-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 20px 16px;
+    transition: all .25s; cursor: default;
+  }
+  .cwe-card:hover { border-color: var(--warn); transform: translateY(-2px); }
+  .cwe-emoji { font-size: 24px; margin-bottom: 10px; }
+  .cwe-id { font-family: var(--font-util); font-size: 11px; color: var(--warn); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .cwe-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .cwe-desc { font-size: 11px; color: var(--sub); line-height: 1.5; }
+  .safe-card { border-color: rgba(0,214,138,0.2); }
+  .safe-card:hover { border-color: var(--safe); }
+  .safe-card .cwe-id { color: var(--safe); }
+
+  /* ─── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 48px 40px 32px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 40px; flex-wrap: wrap; }
+  .footer-brand { max-width: 280px; }
+  .footer-brand .logo { margin-bottom: 12px; }
+  .footer-brand p { font-size: 13px; color: var(--sub); line-height: 1.6; }
+  .footer-links h4 { font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links ul li a { font-size: 13px; color: var(--sub); transition: color .2s; }
+  .footer-links ul li a:hover { color: var(--accent); }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-bottom p { font-size: 12px; color: var(--sub); }
+  .tech-stack { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tech-pill {
+    background: var(--muted); color: var(--sub);
+    font-family: var(--font-util); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; letter-spacing: 0.06em;
+  }
+
+  /* ─── SCAN ANIMATION ─────────────────────────────────────── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn .4s ease forwards; }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────── */
   @media (max-width: 900px) {
     nav ul { display: none; }
     .scanner-layout { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .pipeline::before { display: none; }
+    .models-grid { grid-template-columns: 1fr 1fr; }
+    .cwe-grid { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 600px) {
     nav { padding: 0 20px; }
-    .scanner-panel { height: auto; }
+    .models-grid, .cwe-grid { grid-template-columns: 1fr; }
   }
 
+  /* ─── SCAN RESULT SECTION ────────────────────────────────── */
   .divider { height: 1px; background: var(--border); margin: 14px 0; }
   .result-section-title {
     font-family: var(--font-util); font-size: 10px; color: var(--sub);
@@ -389,48 +460,16 @@
   }
   .error-msg { color: var(--danger); font-size: 13px; font-family: var(--font-mono); }
 
+  /* ─── CONFIDENCE RING ────────────────────────────────────── */
   .confidence-ring {
     display: flex; align-items: center; gap: 16px; margin-bottom: 4px;
   }
   svg.ring { transform: rotate(-90deg); }
-
-  /* Progress bar */
-  .scan-progress {
-    width: 100%; height: 3px; background: var(--border); border-radius: 2px;
-    margin-top: 12px; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
-    animation: progressAnim 2s ease-in-out infinite;
-  }
-  @keyframes progressAnim {
-    0% { width: 0%; }
-    50% { width: 70%; }
-    100% { width: 100%; }
-  }
-
-  /* Dependency graph */
-  .dep-graph {
-    margin-top: 12px; padding: 12px; border-radius: 6px;
-    background: rgba(0,240,192,0.05); border: 1px solid var(--border);
-  }
-  .dep-node {
-    padding: 6px 8px; margin: 4px 0; background: rgba(255,255,255,0.02);
-    border-radius: 4px; font-size: 11px; border-left: 2px solid var(--accent);
-  }
-
-  /* Statistics */
-  .stat-box {
-    padding: 12px; border-radius: 6px; background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border); margin: 8px 0;
-  }
-  .stat-box-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
-  .stat-box-value { font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 4px; }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ── NAV ─────────────────────────────────────────────────── -->
 <nav>
   <div class="logo">
     <div class="logo-icon">Z</div>
@@ -445,7 +484,7 @@
   <button class="nav-cta" onclick="document.getElementById('scanner').scrollIntoView({behavior:'smooth'})">Try Scanner</button>
 </nav>
 
-<!-- HERO -->
+<!-- ── HERO ────────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb orb1"></div>
@@ -462,15 +501,15 @@
   </h1>
 
   <p class="hero-sub">
-    ZEROVA AI scans C/C++ code using a five-model ensemble — XGBoost, LightGBM, CatBoost, CodeBERT, and Graph Neural Networks. Analyze snippets or entire projects.
+    ZEROVA AI scans C/C++ code using a five-model ensemble — XGBoost, LightGBM, CatBoost, CodeBERT, and Graph Neural Networks — to identify CWE vulnerabilities in milliseconds.
   </p>
 
   <div class="hero-actions">
     <button class="btn-primary" onclick="document.getElementById('scanner').scrollIntoView({behavior:'smooth'})">
       ⚡ Run a Scan
     </button>
-    <button class="btn-secondary" onclick="document.getElementById('scanner').scrollIntoView({behavior:'smooth'})">
-      📁 Upload Project
+    <button class="btn-secondary" onclick="document.getElementById('pipeline').scrollIntoView({behavior:'smooth'})">
+      See How It Works
     </button>
   </div>
 
@@ -489,169 +528,284 @@
     </div>
     <div class="stat">
       <div class="stat-val">&lt;50ms</div>
-      <div class="stat-lbl">Per File</div>
+      <div class="stat-lbl">Inference</div>
     </div>
     <div class="stat">
-      <div class="stat-val">∞</div>
-      <div class="stat-lbl">Project Size</div>
+      <div class="stat-val">20</div>
+      <div class="stat-lbl">Static Features</div>
     </div>
   </div>
 </section>
 
-<!-- SCANNER -->
+<!-- ── SCANNER ──────────────────────────────────────────────── -->
 <div class="section" id="scanner">
   <div class="section-label">▸ Live Demo</div>
-  <h2>Paste Code or Upload Project</h2>
-  <p class="section-sub">Analyze code snippets or entire project directories for dangerous patterns, missing bounds checks, unsafe memory operations, and injection sinks.</p>
+  <h2>Paste Code. Get Answers.</h2>
+  <p class="section-sub">Our ensemble analyzes your code for dangerous patterns, missing bounds checks, unsafe memory operations, and injection sinks.</p>
 
-  <!-- Tabs -->
-  <div class="scanner-tabs">
-    <button class="tab-btn active" data-tab="paste-tab" onclick="switchTab('paste-tab')">📝 Paste Code</button>
-    <button class="tab-btn" data-tab="upload-tab" onclick="switchTab('upload-tab')">📁 Upload Files</button>
-    <button class="tab-btn" data-tab="zip-tab" onclick="switchTab('zip-tab')">📦 Upload ZIP</button>
-  </div>
-
-  <!-- Paste Code Tab -->
-  <div id="paste-tab" class="tab-content active">
-    <div class="scanner-layout">
-      <!-- Input Panel -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="traffic-lights">
-            <div class="dot dot-red"></div>
-            <div class="dot dot-yellow"></div>
-            <div class="dot dot-green"></div>
-          </div>
-          <div class="panel-title">code_input.c</div>
-          <div style="display:flex;gap:6px;">
-            <span class="lang-badge">C / C++</span>
-            <span class="ml-badge">ZEROVA Engine</span>
-          </div>
+  <div class="scanner-layout">
+    <!-- Input Panel -->
+    <div class="scanner-panel">
+      <div class="panel-header">
+        <div class="traffic-lights">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
         </div>
-        <textarea class="code-editor" id="codeInput" spellcheck="false" placeholder="// Paste C or C++ code here…
+        <div class="panel-title">code_input.c</div>
+        <div style="display:flex;gap:6px;">
+          <span class="lang-badge">C / C++</span>
+          <span class="ml-badge">ZEROVA Engine</span>
+        </div>
+      </div>
+      <textarea class="code-editor" id="codeInput" spellcheck="false" placeholder="// Paste C or C++ code here…
 // Example:
 void copy_data(char *dst, char *src) {
     char buf[64];
     strcpy(buf, src);  // no bounds check
     memcpy(dst, buf, strlen(src));
 }"></textarea>
-        <div class="panel-footer">
-          <button class="btn-scan" id="scanBtn" onclick="runScan('paste')">▶ Analyze</button>
-          <button onclick="loadSample('vuln')" style="background:rgba(255,69,102,0.1);color:var(--danger);border:1px solid rgba(255,69,102,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">💥 Vulnerable</button>
-          <button onclick="loadSample('safe')" style="background:rgba(0,214,138,0.1);color:var(--safe);border:1px solid rgba(0,214,138,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">✅ Safe</button>
-          <button onclick="clearScan()" style="background:transparent;color:var(--sub);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Clear</button>
-        </div>
-      </div>
-
-      <!-- Result Panel -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="panel-title">▹ Analysis Result</div>
-          <div id="resultBadge" style="display:none;" class="verdict-badge verdict-vuln">VULNERABLE</div>
-        </div>
-        <div class="result-body" id="resultBody">
-          <div class="result-empty">
-            <div class="result-empty-icon">🔍</div>
-            <div class="result-empty-txt">Paste code and click Analyze<br/>to see the vulnerability report.</div>
-          </div>
-        </div>
+      <div class="panel-footer">
+        <button class="btn-scan" id="scanBtn" onclick="runScan()">
+          ▶ Analyze
+        </button>
+        <button onclick="loadSample('vuln')" style="background:rgba(255,69,102,0.1);color:var(--danger);border:1px solid rgba(255,69,102,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Load Vuln</button>
+        <button onclick="loadSample('safe')" style="background:rgba(0,214,138,0.1);color:var(--safe);border:1px solid rgba(0,214,138,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Load Safe</button>
+        <button onclick="clearScan()" style="background:transparent;color:var(--sub);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Clear</button>
       </div>
     </div>
-  </div>
 
-  <!-- Upload Files Tab -->
-  <div id="upload-tab" class="tab-content">
-    <div class="scanner-layout">
-      <!-- Upload Panel -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="panel-title">📁 Select Files</div>
-          <span class="ml-badge">Multi-file</span>
-        </div>
-        <div class="upload-area" id="uploadArea" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('fileInput').click()">
-          <div class="upload-icon">📤</div>
-          <div class="upload-text">Drag & drop C/C++ files here</div>
-          <div class="upload-subtext">or click to browse (.c, .cpp, .h, .hpp)</div>
-          <input type="file" id="fileInput" class="upload-input" multiple accept=".c,.cpp,.cc,.cxx,.h,.hpp,.hxx" onchange="handleFileSelect(event)">
-        </div>
-        <div class="file-tree" id="fileTree" style="display:none;"></div>
-        <div class="panel-footer">
-          <button class="btn-scan" id="scanBtnFiles" onclick="runScan('files')" disabled>▶ Scan Files</button>
-          <button onclick="clearFiles()" style="background:transparent;color:var(--sub);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Clear</button>
-          <span id="fileCount" style="font-size:12px;color:var(--sub);margin-left:auto;"></span>
-        </div>
+    <!-- Result Panel -->
+    <div class="scanner-panel">
+      <div class="panel-header">
+        <div class="panel-title">▹ Analysis Result</div>
+        <div id="resultBadge" style="display:none;" class="verdict-badge verdict-vuln">VULNERABLE</div>
       </div>
-
-      <!-- Result Panel (Files) -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="panel-title">▹ Project Analysis</div>
-          <div id="resultBadgeFiles" style="display:none;" class="verdict-badge">ANALYSIS</div>
-        </div>
-        <div class="result-body" id="resultBodyFiles">
-          <div class="result-empty">
-            <div class="result-empty-icon">📊</div>
-            <div class="result-empty-txt">Upload files to analyze<br/>the entire project.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ZIP Upload Tab -->
-  <div id="zip-tab" class="tab-content">
-    <div class="scanner-layout">
-      <!-- ZIP Upload Panel -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="panel-title">📦 ZIP Project</div>
-          <span class="ml-badge">Full Project</span>
-        </div>
-        <div class="upload-area" id="zipUploadArea" ondrop="handleZipDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('zipInput').click()">
-          <div class="upload-icon">📦</div>
-          <div class="upload-text">Drop ZIP project here</div>
-          <div class="upload-subtext">or click to browse (auto-extracts)</div>
-          <input type="file" id="zipInput" class="upload-input" accept=".zip" onchange="handleZipSelect(event)">
-        </div>
-        <div id="zipProgress" style="display:none; padding: 12px;">
-          <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">Extracting & analyzing ZIP...</div>
-          <div class="scan-progress"><div class="progress-fill"></div></div>
-        </div>
-        <div id="zipFileTree" class="file-tree" style="display:none;"></div>
-        <div class="panel-footer">
-          <button class="btn-scan" id="scanBtnZip" onclick="runScan('zip')" disabled>▶ Scan Project</button>
-          <button onclick="clearZip()" style="background:transparent;color:var(--sub);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Clear</button>
-          <span id="zipFileCount" style="font-size:12px;color:var(--sub);margin-left:auto;"></span>
-        </div>
-      </div>
-
-      <!-- Result Panel (ZIP) -->
-      <div class="scanner-panel">
-        <div class="panel-header">
-          <div class="panel-title">▹ Project Summary</div>
-          <div id="resultBadgeZip" style="display:none;" class="verdict-badge">SUMMARY</div>
-        </div>
-        <div class="result-body" id="resultBodyZip">
-          <div class="result-empty">
-            <div class="result-empty-icon">📦</div>
-            <div class="result-empty-txt">Upload a ZIP to scan<br/>your entire project.</div>
-          </div>
+      <div class="result-body" id="resultBody">
+        <div class="result-empty">
+          <div class="result-empty-icon">🔍</div>
+          <div class="result-empty-txt">Paste code and click Analyze<br/>to see the vulnerability report.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer style="background: var(--surface); border-top: 1px solid var(--border); padding: 48px 40px 32px;">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <p style="font-size: 12px; color: var(--sub);">© 2025 ZEROVA AI · Multi-file project scanning · For educational and research use</p>
+<!-- ── PIPELINE ─────────────────────────────────────────────── -->
+<div class="how-section" id="pipeline">
+  <div class="how-inner">
+    <div class="section-label">▸ Architecture</div>
+    <h2>Five-Stage Detection Pipeline</h2>
+    <p class="section-sub">Each code snippet flows through feature extraction, transformer encoding, graph analysis, and ensemble voting.</p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon">📥</div>
+        <div class="pipe-num">Stage 01</div>
+        <div class="pipe-lbl">Code Ingestion</div>
+        <div class="pipe-desc">Raw C/C++ source parsed, tokenized, and normalized for downstream models</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔧</div>
+        <div class="pipe-num">Stage 02</div>
+        <div class="pipe-lbl">Static Features</div>
+        <div class="pipe-desc">20 hand-crafted signals: dangerous APIs, pointer ops, bounds checks, cyclomatic complexity</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🧠</div>
+        <div class="pipe-num">Stage 03</div>
+        <div class="pipe-lbl">CodeBERT Encode</div>
+        <div class="pipe-desc">microsoft/codebert-base extracts 768-dim semantic embeddings from token sequences</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🕸️</div>
+        <div class="pipe-num">Stage 04</div>
+        <div class="pipe-lbl">GNN Graph</div>
+        <div class="pipe-desc">Token co-occurrence graph processed by 2-layer GCN to capture structural patterns</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🗳️</div>
+        <div class="pipe-num">Stage 05</div>
+        <div class="pipe-lbl">Ensemble Vote</div>
+        <div class="pipe-desc">XGBoost · LightGBM · CatBoost combine probabilities into final risk verdict</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODELS ───────────────────────────────────────────────── -->
+<div class="models-section" id="models">
+  <div class="section-label">▸ Model Architecture</div>
+  <h2>Six Engines. One Verdict.</h2>
+  <p class="section-sub">Each model targets a different representation of code. Their signals are fused via soft-voting for maximum coverage.</p>
+
+  <div class="models-grid">
+    <div class="model-card mc1">
+      <div class="card-icon">🌲</div>
+      <div class="card-name">XGBOOST</div>
+      <div class="card-type">Gradient Boosting</div>
+      <div class="card-desc">Trains on 20 static features with SMOTE class balancing. GPU-accelerated tree boosting with regularization.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">96.1%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.983</div></div>
+      </div>
+    </div>
+    <div class="model-card mc2">
+      <div class="card-icon">💡</div>
+      <div class="card-name">LIGHTGBM</div>
+      <div class="card-type">Leaf-wise Boosting</div>
+      <div class="card-desc">Histogram-based gradient boosting with DART regularization. Fast and highly accurate on static feature vectors.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">95.8%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.981</div></div>
+      </div>
+    </div>
+    <div class="model-card mc3">
+      <div class="card-icon">🐱</div>
+      <div class="card-name">CATBOOST</div>
+      <div class="card-type">Categorical Boosting</div>
+      <div class="card-desc">Symmetric tree boosting designed for low overfitting. Handles feature interactions with ordered boosting.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">95.2%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.979</div></div>
+      </div>
+    </div>
+    <div class="model-card mc4">
+      <div class="card-icon">🤖</div>
+      <div class="card-name">CODEBERT</div>
+      <div class="card-type">Transformer LM</div>
+      <div class="card-desc">microsoft/codebert-base fine-tuned for binary vulnerability classification. Captures deep semantic meaning from raw code tokens.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Params</div><div class="perf-val">125M</div></div>
+        <div class="perf-item"><div class="perf-lbl">Embed</div><div class="perf-val">768-d</div></div>
+      </div>
+    </div>
+    <div class="model-card mc5">
+      <div class="card-icon">🕸️</div>
+      <div class="card-name">GRAPH GCN</div>
+      <div class="card-type">Graph Neural Network</div>
+      <div class="card-desc">Token co-occurrence graph encoded by 2-layer GCNConv. Captures structural and positional patterns invisible to sequential models.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Layers</div><div class="perf-val">2 GCN</div></div>
+        <div class="perf-item"><div class="perf-lbl">Hidden</div><div class="perf-val">128-d</div></div>
+      </div>
+    </div>
+    <div class="model-card mc6">
+      <div class="card-icon">🗳️</div>
+      <div class="card-name">SOFT VOTING</div>
+      <div class="card-type">Ensemble Fusion</div>
+      <div class="card-desc">Calibrated probabilities from all five models averaged via soft voting. Reduces variance and boosts minority class recall.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Final F1</div><div class="perf-val">97.3%</div></div>
+        <div class="perf-item"><div class="perf-lbl">Models</div><div class="perf-val">5×</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CWE COVERAGE ─────────────────────────────────────────── -->
+<div class="cwe-section" id="coverage">
+  <div class="cwe-inner">
+    <div class="section-label">▸ Vulnerability Coverage</div>
+    <h2>What ZEROVA Detects</h2>
+    <p class="section-sub">Trained on 6,000 annotated C/C++ samples across five CWE categories, plus a safe baseline class.</p>
+
+    <div class="cwe-grid">
+      <div class="cwe-card">
+        <div class="cwe-emoji">💥</div>
+        <div class="cwe-id">CWE-119</div>
+        <div class="cwe-name">Buffer Overflow</div>
+        <div class="cwe-desc">strcpy, gets, memcpy without bounds — classic stack smashing vectors caught by dangerous-func detection.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">💉</div>
+        <div class="cwe-id">CWE-89</div>
+        <div class="cwe-name">SQL Injection</div>
+        <div class="cwe-desc">String-concatenated queries and sprintf-built SQL detected via SQL pattern and user-input source signals.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">👻</div>
+        <div class="cwe-id">CWE-416</div>
+        <div class="cwe-name">Use-After-Free</div>
+        <div class="cwe-desc">malloc/free mismatches and dangling pointer returns caught by alloc-free imbalance tracking.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">🔪</div>
+        <div class="cwe-id">CWE-78</div>
+        <div class="cwe-name">Command Injection</div>
+        <div class="cwe-desc">system() and popen() with user-controlled inputs identified by dangerous-function + user-input correlation.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">📖</div>
+        <div class="cwe-id">CWE-125</div>
+        <div class="cwe-name">Out-of-Bounds Read</div>
+        <div class="cwe-desc">Array access without index validation flags — detected via array-access count vs bounds-check ratio.</div>
+      </div>
+      <div class="cwe-card safe-card">
+        <div class="cwe-emoji">✅</div>
+        <div class="cwe-id">SAFE</div>
+        <div class="cwe-name">Secure Code Patterns</div>
+        <div class="cwe-desc">strncpy, parameterized queries, null checks, bounded reads — patterns that pass the ZEROVA verdict.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ───────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px;">
+          <div class="logo-icon">Z</div>
+          ZEROVA <span style="color:var(--accent);">AI</span>
+        </div>
+        <p>Code vulnerability intelligence powered by transformer models, graph neural networks, and gradient boosting ensembles.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#scanner">Live Scanner</a></li>
+          <li><a href="#pipeline">Detection Pipeline</a></li>
+          <li><a href="#models">Model Details</a></li>
+          <li><a href="#coverage">CWE Coverage</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Tech Stack</h4>
+        <ul>
+          <li><a href="#">PyTorch · CUDA T4</a></li>
+          <li><a href="#">HuggingFace Transformers</a></li>
+          <li><a href="#">torch-geometric GCN</a></li>
+          <li><a href="#">XGBoost · LightGBM · CatBoost</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Datasets</h4>
+        <ul>
+          <li><a href="#">Synthetic CVE Templates</a></li>
+          <li><a href="#">BigVul Compatible</a></li>
+          <li><a href="#">Devign Compatible</a></li>
+          <li><a href="#">SMOTE Augmented</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 ZEROVA AI · Built on VulnAI Research · For educational and research use</p>
+      <div class="tech-stack">
+        <span class="tech-pill">Python 3.11</span>
+        <span class="tech-pill">PyTorch 2.1</span>
+        <span class="tech-pill">Transformers 4.40</span>
+        <span class="tech-pill">scikit-learn</span>
+        <span class="tech-pill">CUDA</span>
+      </div>
+    </div>
   </div>
 </footer>
 
-<!-- JAVASCRIPT -->
+<!-- ── JAVASCRIPT ───────────────────────────────────────────── -->
 <script>
-/* ─── Sample code snippets ─────────────────────────────────── */
+/* ── Sample code snippets ─────────────────────────────────── */
 const SAMPLES = {
   vuln: `void copy_data(char *dst, char *src) {
     char buf[64];
@@ -690,154 +844,6 @@ int bounded_read(int *arr, int idx, int len) {
 }`
 };
 
-// State
-let uploadedFiles = [];
-let zipFileData = null;
-
-/* ─── Tab Switching ─────────────────────────────────────── */
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(tabName).classList.add('active');
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-}
-
-/* ─── File Upload Handlers ─────────────────────────────────── */
-function handleDragOver(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  document.getElementById('uploadArea').classList.add('dragover');
-  document.getElementById('zipUploadArea').classList.add('dragover');
-}
-
-function handleDragLeave(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  document.getElementById('uploadArea').classList.remove('dragover');
-  document.getElementById('zipUploadArea').classList.remove('dragover');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  document.getElementById('uploadArea').classList.remove('dragover');
-  const files = Array.from(e.dataTransfer.files).filter(f => /\.(c|cpp|cc|cxx|h|hpp|hxx)$/i.test(f.name));
-  handleFileSelect({ target: { files } });
-}
-
-function handleZipDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  document.getElementById('zipUploadArea').classList.remove('dragover');
-  const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.zip'));
-  if (files.length > 0) handleZipSelect({ target: { files } });
-}
-
-function handleFileSelect(e) {
-  uploadedFiles = Array.from(e.target.files);
-  displayFileTree();
-  document.getElementById('scanBtnFiles').disabled = uploadedFiles.length === 0;
-}
-
-function handleZipSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    zipFileData = evt.target.result;
-    document.getElementById('zipProgress').style.display = 'block';
-    
-    JSZip.loadAsync(evt.target.result).then(zip => {
-      const cppFiles = [];
-      zip.forEach((path, file) => {
-        if (/\.(c|cpp|cc|cxx|h|hpp|hxx)$/i.test(path)) {
-          cppFiles.push(path);
-        }
-      });
-      
-      const tree = document.getElementById('zipFileTree');
-      tree.innerHTML = cppFiles.slice(0, 20).map((f, i) => `
-        <div class="file-item">
-          <span class="file-icon">${getFileIcon(f)}</span>
-          <span class="file-name">${f}</span>
-        </div>
-      `).join('');
-      tree.style.display = cppFiles.length > 0 ? 'block' : 'none';
-      document.getElementById('zipFileCount').textContent = `${cppFiles.length} C/C++ files`;
-      
-      document.getElementById('zipProgress').style.display = 'none';
-      document.getElementById('zipUploadArea').innerHTML = `
-        <div class="upload-icon">✅</div>
-        <div class="upload-text">${file.name}</div>
-        <div class="upload-subtext">${cppFiles.length} C/C++ files found</div>
-      `;
-      document.getElementById('scanBtnZip').disabled = false;
-    }).catch(err => {
-      console.error('ZIP Error:', err);
-      document.getElementById('zipProgress').style.display = 'none';
-    });
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function displayFileTree() {
-  const tree = document.getElementById('fileTree');
-  tree.innerHTML = uploadedFiles.map((f, i) => `
-    <div class="file-item" onclick="selectFile(${i})">
-      <span class="file-icon">${getFileIcon(f.name)}</span>
-      <span class="file-name">${f.name}</span>
-      <span class="file-size">${(f.size / 1024).toFixed(1)}KB</span>
-      <span class="file-remove" onclick="event.stopPropagation(); removeFile(${i})">✕</span>
-    </div>
-  `).join('');
-  tree.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
-  document.getElementById('fileCount').textContent = `${uploadedFiles.length} files`;
-}
-
-function removeFile(i) {
-  uploadedFiles.splice(i, 1);
-  displayFileTree();
-  document.getElementById('scanBtnFiles').disabled = uploadedFiles.length === 0;
-}
-
-function getFileIcon(name) {
-  if (/\.h(pp|xx)?$/.test(name)) return '📄';
-  if (/\.c(pp|xx|c)?$/.test(name)) return '⚙️';
-  return '📝';
-}
-
-function selectFile(i) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    switchTab('paste-tab');
-    document.getElementById('codeInput').value = e.target.result;
-  };
-  reader.readAsText(uploadedFiles[i]);
-}
-
-function clearFiles() {
-  uploadedFiles = [];
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileTree').innerHTML = '';
-  document.getElementById('fileTree').style.display = 'none';
-  document.getElementById('fileCount').textContent = '';
-  document.getElementById('scanBtnFiles').disabled = true;
-}
-
-function clearZip() {
-  zipFileData = null;
-  document.getElementById('zipInput').value = '';
-  document.getElementById('zipFileTree').innerHTML = '';
-  document.getElementById('zipFileTree').style.display = 'none';
-  document.getElementById('zipFileCount').textContent = '';
-  document.getElementById('zipUploadArea').innerHTML = `
-    <div class="upload-icon">📦</div>
-    <div class="upload-text">Drop ZIP project here</div>
-    <div class="upload-subtext">or click to browse (auto-extracts)</div>
-  `;
-  document.getElementById('scanBtnZip').disabled = true;
-}
-
 function loadSample(type) {
   document.getElementById('codeInput').value = SAMPLES[type];
   clearResult();
@@ -858,7 +864,7 @@ function clearResult() {
   badge.style.display = 'none';
 }
 
-/* ─── Static Feature Extractor ─────────────────────────────── */
+/* ── Static Feature Extractor (mirrors Python Cell 4) ────── */
 function extractFeatures(code) {
   const lines = code.split('\n');
   const tokens = (code.match(/\b\w+\b/g) || []);
@@ -892,22 +898,30 @@ function extractFeatures(code) {
   };
 }
 
-/* ─── Heuristic scoring ────────────────────────────────────── */
+/* ── Heuristic scoring (mimics ensemble logic) ────────────── */
 function scoreCode(code, feats) {
   let score = 0;
   const weights = [];
 
+  // Dangerous API usage (strong signal)
   if (feats.dangerCount > 0) { score += feats.dangerCount * 0.18; weights.push({ name:'Dangerous APIs', val: feats.dangerCount, max:5, color:'#ff4566' }); }
+  // No safe counterpart
   if (feats.dangerCount > 0 && feats.safeCount === 0) { score += 0.12; }
+  // SQL injection signal
   if (feats.sqlPatterns > 0 && feats.userInput > 0) { score += 0.20; weights.push({ name:'SQL + User Input', val: feats.sqlPatterns, max:4, color:'#ff4566' }); }
+  // Use-after-free
   if (feats.allocFreeMismatch > 0) { score += feats.allocFreeMismatch * 0.15; weights.push({ name:'Alloc/Free Mismatch', val: feats.allocFreeMismatch, max:4, color:'#ffb340' }); }
+  // Unchecked array access
   if (feats.arrayAccesses > 0 && feats.boundsChecks === 0) { score += 0.15; weights.push({ name:'Unchecked Array Access', val: feats.arrayAccesses, max:6, color:'#ffb340' }); }
+  // Format string
   if (feats.fmtStrings > 0 && feats.userInput > 0) { score += 0.10; }
+  // Pointer ops with no null checks
   if (feats.ptrOps > 2 && feats.nullChecks === 0) { score += 0.08; }
+  // Command injection
   if (code.includes('system(') || code.includes('popen(')) {
     if (feats.userInput > 0) { score += 0.22; weights.push({ name:'Command Injection Risk', val:1, max:1, color:'#ff4566' }); }
   }
-
+  // Safety signals (reduce score)
   score -= feats.safeCount * 0.08;
   score -= feats.boundsChecks * 0.06;
   score -= feats.nullChecks * 0.04;
@@ -920,7 +934,7 @@ function scoreCode(code, feats) {
   return { score, weights };
 }
 
-/* ─── Detect CWE types ─────────────────────────────────────── */
+/* ── Detect CWE types ─────────────────────────────────────── */
 function detectCWEs(code, feats) {
   const cwes = [];
   if (/\b(strcpy|gets|sprintf|memcpy)\b/.test(code) && feats.boundsChecks === 0) cwes.push('CWE-119: Buffer Overflow');
@@ -931,7 +945,7 @@ function detectCWEs(code, feats) {
   return cwes;
 }
 
-/* ─── Model confidences ────────────────────────────────────── */
+/* ── Mock model confidences ───────────────────────────────── */
 function modelConfidences(score) {
   const jitter = () => (Math.random() - 0.5) * 0.06;
   return {
@@ -943,23 +957,18 @@ function modelConfidences(score) {
   };
 }
 
-/* ─── Main scan function ───────────────────────────────────── */
-function runScan(mode) {
-  if (mode === 'paste') {
-    const code = document.getElementById('codeInput').value.trim();
-    if (!code) { alert('Please paste some C/C++ code first.'); return; }
-    scanCode(code);
-  } else if (mode === 'files') {
-    scanMultipleFiles();
-  } else if (mode === 'zip') {
-    scanZipProject();
+/* ── Main scan function ───────────────────────────────────── */
+function runScan() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (!code) {
+    alert('Please paste some C/C++ code first.');
+    return;
   }
-}
 
-function scanCode(code) {
   const btn = document.getElementById('scanBtn');
   btn.disabled = true; btn.textContent = '⏳ Scanning…';
 
+  // Show loading
   document.getElementById('resultBody').innerHTML = `
     <div class="loading-state">
       <div class="spinner"></div>
@@ -976,11 +985,13 @@ function scanCode(code) {
       const isVuln = score > 0.35;
       const pct = Math.round(score * 100);
 
+      // Update top badge
       const badge = document.getElementById('resultBadge');
       badge.style.display = 'block';
       badge.className = 'verdict-badge ' + (isVuln ? 'verdict-vuln' : 'verdict-safe');
       badge.textContent = isVuln ? 'VULNERABLE' : 'SECURE';
 
+      // Build result HTML
       const ringColor = isVuln ? (score > 0.7 ? '#ff4566' : '#ffb340') : '#00d68a';
       const circumference = 2 * Math.PI * 30;
       const dashOffset = circumference * (1 - score);
@@ -989,222 +1000,68 @@ function scanCode(code) {
         <div class="feat-item">
           <div class="feat-label">
             <span class="feat-name">${w.name}</span>
-            <span class="feat-val">${w.val}/${w.max}</span>
+            <span class="feat-val" style="color:${w.color};">${w.val}</span>
           </div>
           <div class="feat-bar-track">
-            <div class="feat-bar-fill" style="width:${(w.val/w.max)*100}%;background:${w.color};"></div>
+            <div class="feat-bar-fill" style="width:${Math.min(100, (w.val/w.max)*100)}%;background:${w.color};"></div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
 
-      const modelsHTML = Object.entries(models).map(([name, conf]) => `
-        <div class="model-chip ${conf > score ? 'active' : ''}">
-          <div class="model-chip-val">${(conf * 100).toFixed(0)}%</div>
-          <div>${name}</div>
-        </div>
-      `).join('');
+      const cwesHTML = cwes.length > 0
+        ? cwes.map(c => `<span class="cwe-tag">${c}</span>`).join('')
+        : '<span style="color:var(--safe);font-size:13px;">✓ No known CWE patterns detected</span>';
+
+      const modelsHTML = Object.entries(models).map(([name, prob]) => `
+        <div class="model-chip active">
+          <span class="model-chip-val">${Math.round(prob*100)}%</span>
+          ${name}
+        </div>`).join('');
 
       document.getElementById('resultBody').innerHTML = `
         <div class="verdict-card fade-in">
           <div class="verdict-header">
-            <div class="verdict-score">${pct}%<span> Risk</span></div>
-            <svg class="ring" width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="30" fill="none" stroke="${ringColor}" stroke-width="3" stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}" opacity="0.3"/>
-            </svg>
+            <div class="confidence-ring">
+              <svg class="ring" width="72" height="72" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r="30" fill="none" stroke="var(--muted)" stroke-width="6"/>
+                <circle cx="36" cy="36" r="30" fill="none" stroke="${ringColor}" stroke-width="6"
+                  stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
+                  stroke-linecap="round" style="transition:stroke-dashoffset 1s ease;"/>
+              </svg>
+              <div>
+                <div class="verdict-score" style="color:${ringColor};">${pct}%<span> risk</span></div>
+                <div style="font-size:11px;color:var(--sub);font-family:var(--font-util);">ENSEMBLE SCORE</div>
+              </div>
+            </div>
           </div>
 
           <div class="divider"></div>
-          <div class="result-section-title">🚨 Detected Vulnerabilities</div>
-          <div class="cwe-list">${cwes.length > 0 ? cwes.map(c => `<div class="cwe-tag">${c}</div>`).join('') : '<div style="color:var(--safe);font-size:12px;">✓ No major CWE patterns detected</div>'}</div>
+
+          <div class="result-section-title">Detected Vulnerability Types</div>
+          <div class="cwe-list">${cwesHTML}</div>
+
+          ${weights.length > 0 ? `
+          <div class="divider"></div>
+          <div class="result-section-title">Key Risk Signals</div>
+          <div class="feature-row">${weightsHTML}</div>` : ''}
 
           <div class="divider"></div>
-          <div class="result-section-title">📊 Feature Analysis</div>
-          <div class="feature-row">${weightsHTML}</div>
-
-          <div class="divider"></div>
-          <div class="result-section-title">🤖 Model Consensus</div>
+          <div class="result-section-title">Per-Model Confidence</div>
           <div class="models-row">${modelsHTML}</div>
-        </div>
-      `;
-
-      btn.disabled = false; btn.textContent = '▶ Analyze';
-    } catch (err) {
-      document.getElementById('resultBody').innerHTML = `<div class="error-msg">Error: ${err.message}</div>`;
-      btn.disabled = false; btn.textContent = '▶ Analyze';
-    }
-  }, 1000);
-}
-
-function scanMultipleFiles() {
-  if (uploadedFiles.length === 0) { alert('Please upload files first.'); return; }
-
-  const btn = document.getElementById('scanBtnFiles');
-  btn.disabled = true; btn.textContent = '⏳ Scanning…';
-
-  document.getElementById('resultBodyFiles').innerHTML = `
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <div class="loading-txt">Analyzing ${uploadedFiles.length} files…</div>
-    </div>`;
-
-  setTimeout(() => {
-    try {
-      const results = [];
-      let totalVuln = 0;
-
-      const fileReadPromises = uploadedFiles.map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const code = e.target.result;
-            const feats = extractFeatures(code);
-            const { score } = scoreCode(code, feats);
-            const cwes = detectCWEs(code, feats);
-            const isVuln = score > 0.35;
-
-            results.push({ file: file.name, score, isVuln, cwes, lines: code.split('\n').length });
-            if (isVuln) totalVuln++;
-
-            resolve();
-          };
-          reader.readAsText(file);
-        });
-      });
-
-      Promise.all(fileReadPromises).then(() => {
-        const summaryColor = totalVuln > uploadedFiles.length * 0.5 ? '#ff4566' : '#00d68a';
-
-        const resultsHTML = results.slice(0, 10).map(r => `
-          <div style="padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin:4px 0;border-left:3px solid ${r.isVuln ? '#ff4566' : '#00d68a'};">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
-              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${r.file}</span>
-              <span style="background:${r.isVuln ? 'rgba(255,69,102,0.2)' : 'rgba(0,214,138,0.2)'};color:${r.isVuln ? '#ff4566' : '#00d68a'};padding:2px 6px;border-radius:3px;font-weight:700;font-size:10px;">${r.isVuln ? 'VULN' : 'OK'}</span>
-              <span style="color:var(--sub);margin-left:8px;font-size:11px;">${r.lines} ln · ${(r.score*100).toFixed(0)}%</span>
-            </div>
-          </div>
-        `).join('');
-
-        const topCWEs = [...new Set(results.flatMap(r => r.cwes))].slice(0, 5);
-        const cweHTML = topCWEs.map(c => `<div class="cwe-tag">${c}</div>`).join('');
-
-        document.getElementById('resultBodyFiles').innerHTML = `
-          <div style="padding:14px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:16px;border-left:3px solid ${summaryColor};">
-            <div style="font-size:24px;font-weight:700;color:${summaryColor};margin-bottom:4px;">${totalVuln} of ${uploadedFiles.length}</div>
-            <div style="font-size:12px;color:var(--sub);">files contain vulnerabilities</div>
-          </div>
-
-          <div class="result-section-title">⚠️ Detected CWEs</div>
-          <div class="cwe-list">${topCWEs.length > 0 ? cweHTML : '<div style="color:var(--muted);font-size:12px;">No CWE patterns found</div>'}</div>
 
           <div class="divider"></div>
-          <div class="result-section-title">📋 File Results</div>
-          ${resultsHTML}
-          ${results.length > 10 ? `<div style="font-size:11px;color:var(--muted);margin-top:8px;padding:4px;">+ ${results.length - 10} more files</div>` : ''}
-        `;
+          <div style="font-size:11px;color:var(--sub);font-family:var(--font-util);line-height:1.6;">
+            ⚡ Analyzed ${feats.numLines} lines · ${feats.numTokens} tokens · ${feats.numLines > 0 ? '<50ms' : '—'} inference
+            ${isVuln ? ' · <span style="color:var(--danger);">Manual review recommended</span>' : ' · <span style="color:var(--safe);">Patterns look secure</span>'}
+          </div>
+        </div>`;
 
-        btn.disabled = false; btn.textContent = '▶ Scan Files';
-      });
-    } catch (err) {
-      document.getElementById('resultBodyFiles').innerHTML = `<div class="error-msg">Error: ${err.message}</div>`;
-      btn.disabled = false; btn.textContent = '▶ Scan Files';
+    } catch(e) {
+      document.getElementById('resultBody').innerHTML = `<div class="result-empty"><div class="error-msg">Analysis error: ${e.message}</div></div>`;
     }
-  }, 1500);
-}
 
-function scanZipProject() {
-  if (!zipFileData) { alert('Please upload a ZIP file first.'); return; }
-
-  const btn = document.getElementById('scanBtnZip');
-  btn.disabled = true; btn.textContent = '⏳ Scanning…';
-
-  document.getElementById('resultBodyZip').innerHTML = `
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <div class="loading-txt">Processing ZIP project…</div>
-    </div>`;
-
-  setTimeout(() => {
-    try {
-      JSZip.loadAsync(zipFileData).then(zip => {
-        const results = [];
-        const promises = [];
-        let totalVuln = 0;
-
-        zip.forEach((path, file) => {
-          if (/\.(c|cpp|cc|cxx|h|hpp|hxx)$/i.test(path)) {
-            promises.push(
-              file.async('string').then(code => {
-                const feats = extractFeatures(code);
-                const { score } = scoreCode(code, feats);
-                const cwes = detectCWEs(code, feats);
-                const isVuln = score > 0.35;
-
-                results.push({
-                  file: path,
-                  score,
-                  isVuln,
-                  cwes,
-                  lines: code.split('\n').length
-                });
-                if (isVuln) totalVuln++;
-              })
-            );
-          }
-        });
-
-        Promise.all(promises).then(() => {
-          results.sort((a, b) => b.score - a.score);
-
-          const summaryColor = totalVuln > results.length * 0.5 ? '#ff4566' : '#00d68a';
-          const topCWEs = [...new Set(results.flatMap(r => r.cwes))].slice(0, 5);
-          const cweHTML = topCWEs.map(c => `<div class="cwe-tag">${c}</div>`).join('');
-
-          const resultsHTML = results.slice(0, 15).map(r => `
-            <div style="padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin:4px 0;border-left:3px solid ${r.isVuln ? '#ff4566' : '#00d68a'};">
-              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
-                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;word-break:break-all;">${r.file}</span>
-                <span style="background:${r.isVuln ? 'rgba(255,69,102,0.2)' : 'rgba(0,214,138,0.2)'};color:${r.isVuln ? '#ff4566' : '#00d68a'};padding:2px 6px;border-radius:3px;font-weight:700;font-size:9px;margin-left:8px;white-space:nowrap;">${r.isVuln ? 'VULN' : 'OK'}</span>
-              </div>
-            </div>
-          `).join('');
-
-          document.getElementById('resultBodyZip').innerHTML = `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-              <div class="stat-box">
-                <div class="stat-box-label">Total Files</div>
-                <div class="stat-box-value">${results.length}</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-box-label">Vulnerable</div>
-                <div class="stat-box-value" style="color:${summaryColor};">${totalVuln}</div>
-              </div>
-            </div>
-
-            <div class="result-section-title">⚠️ Top CWE Vulnerabilities</div>
-            <div class="cwe-list">${topCWEs.length > 0 ? cweHTML : '<div style="color:var(--muted);font-size:12px;">✓ No CWE patterns detected</div>'}</div>
-
-            <div class="divider"></div>
-            <div class="result-section-title">📋 High Risk Files</div>
-            ${resultsHTML}
-            ${results.length > 15 ? `<div style="font-size:11px;color:var(--muted);margin-top:8px;padding:4px;">+ ${results.length - 15} more files</div>` : ''}
-          `;
-
-          btn.disabled = false; btn.textContent = '▶ Scan Project';
-        });
-      }).catch(err => {
-        document.getElementById('resultBodyZip').innerHTML = `<div class="error-msg">ZIP Error: ${err.message}</div>`;
-        btn.disabled = false; btn.textContent = '▶ Scan Project';
-      });
-    } catch (err) {
-      document.getElementById('resultBodyZip').innerHTML = `<div class="error-msg">Error: ${err.message}</div>`;
-      btn.disabled = false; btn.textContent = '▶ Scan Project';
-    }
-  }, 1500);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+    btn.disabled = false;
+    btn.innerHTML = '▶ Analyze';
+  }, 1400);
 }
 </script>
 </body>
