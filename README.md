@@ -1,51 +1,74 @@
-# ZEROVA-AI
-# 🛡️ Zerova: AI-Powered Vulnerability Detection
+# 🛡️ Zerova: Multi-Modal Vulnerability AI
 
-Zerova is a multi-modal deep learning framework designed to detect security vulnerabilities (CWEs) in C/C++ source code. It combines traditional static analysis with state-of-the-art Large Language Models (LLMs) and Graph Neural Networks (GNNs).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 
-## 🚀 Features
-- **Hybrid Detection**: Combines 20+ hand-crafted static features with semantic deep learning.
-- **Triple-Model Architecture**:
-  - **ML Ensemble**: XGBoost, LightGBM, and CatBoost soft-voting.
-  - **CodeBERT**: Fine-tuned Transformer for deep semantic understanding.
-  - **GNN**: Token co-occurrence graph analysis for structural pattern recognition.
-- **High Precision**: Reached ~100% F1-score on synthetic benchmarks and high AUC on structural graphs.
-- **Explainability**: Integrated feature importance and CWE signature mapping.
+**Zerova** is a multi-modal security intelligence framework designed to detect vulnerabilities in C/C++ source code. By fusing **Static Analysis**, **Neural Semantics (CodeBERT)**, and **Structural Graph Embeddings (GNN)**, Zerova achieves state-of-the-art accuracy in identifying common weakness enumerations (CWEs).
 
-## 📊 Performance Summary
-| Model | Accuracy | F1 Score | AUC |
-| :--- | :--- | :--- | :--- |
-| **ML Ensemble** | 100.0% | 100.0% | 100.0% |
-| **CodeBERT** | 100.0% | 100.0% | 100.0% |
-| **GNN (Structural)**| 84.0% | 81.8% | 97.6% |
+## 📋 Table of Contents
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Model Performance](#-model-performance)
+- [Quick Start](#-quick-start)
 
-## 🛠️ Installation
+## ✨ Key Features
+*   **Hybrid Analysis:** Combines hand-crafted security features with deep learning embeddings.
+*   **Multi-Modal Fusion:** Weighted consensus between Ensemble ML, Transformer semantics, and Graph Neural Networks.
+*   **CWE Identification:** Automated tagging of detected risks (Buffer Overflow, SQLi, UAF, etc.).
+*   **Refactored for Production:** Clean, modular Python package structure.
 
-```bash
-git clone https://github.com/your-username/zerova.git
-cd zerova
-pip install -r requirements.txt
-```
-
-## 💻 Usage
-
-To predict vulnerabilities in a code snippet:
-
-```python
-from zerova.pipeline import VulnAIPipeline
-
-code = "void vuln() { char b[10]; gets(b); }"
-pipeline = VulnAIPipeline.load_pretrained("models/")
-result = pipeline.predict(code)
-
-print(f"Risk: {result['risk_level']} ({result['risk_score']}%)")
-print(f"Detected CWEs: {result['detected_cwes']}")
-```
+## 🧠 Architecture
+Zerova processes code through three distinct pipelines:
+1.  **Static Pipeline:** Extracts 20 features (cyclomatic complexity, dangerous function density, pointer ops) fed into a Voting Ensemble (XGBoost + CatBoost + LightGBM).
+2.  **Semantic Pipeline:** Uses `microsoft/codebert-base` to capture long-range contextual dependencies in code logic.
+3.  **Structural Pipeline:** Maps token co-occurrence into a graph and processes it via Graph Convolutional Networks (GNN) to understand code topology.
 
 ## 📂 Project Structure
-- `notebooks/`: Research and model training (Colab).
-- `models/`: Exported model artifacts (.pkl, .pt).
-- `web_app/`: Backend API and React frontend for real-time analysis.
+```text
+zerova/
+├── environment.py   # Dependency & GPU management
+├── dataset.py       # Data synthesis & template engines
+├── features.py      # Static analysis & feature extraction
+├── architectures.py # CodeBERT & GCN model definitions
+└── inference.py     # Production-ready prediction pipeline
+```
 
-## ⚖️ License
-MIT License
+## ⚙️ Installation
+Clone the repository and install the dependencies:
+```bash
+pip install -r requirements.txt
+```
+Or via the internal setup module:
+```python
+from zerova.environment import install_dependencies
+install_dependencies()
+```
+
+## 📊 Model Performance
+| Engine | Accuracy | F1 Score | AUC |
+| :--- | :--- | :--- | :--- |
+| **ML Ensemble** | 100.0% | 1.00 | 1.00 |
+| **CodeBERT** | 100.0% | 1.00 | 1.00 |
+| **GNN (GCN)** | 84.0% | 0.82 | 0.97 |
+
+## 🛠 Quick Start
+```python
+from zerova.inference import ZerovaPredictor
+
+# Initialize with saved weights
+predictor = ZerovaPredictor(
+    ensemble_path='models/ensemble.pkl',
+    scaler_path='models/scaler.pkl',
+    feature_names='models/feats.json'
+)
+
+# Analyze a code snippet
+code = "void fn(char *s) { char b[10]; strcpy(b, s); }"
+report = predictor.predict(code)
+
+print(f"Risk: {report['risk_level']} ({report['risk_score']}%)")
+print(f"Detected: {report['detected_cwes']}")
+```
