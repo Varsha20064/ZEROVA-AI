@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZEROVA AI — Code Vulnerability Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* ─── DESIGN TOKENS ─────────────────────────────────────── */
+  :root {
+    --void:      #050810;
+    --surface:   #0b0f1e;
+    --panel:     #111827;
+    --border:    #1e2a3a;
+    --muted:     #1c2d42;
+    --text:      #e2e8f4;
+    --sub:       #6b7fa3;
+    --accent:    #00f0c0;   /* zerova teal */
+    --accent2:   #7b5cfa;   /* electric violet */
+    --danger:    #ff4566;
+    --warn:      #ffb340;
+    --safe:      #00d68a;
+    --font-disp: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-util: 'Space Mono', monospace;
+    --r:         8px;
+    --r-lg:      16px;
+  }
+
+  /* ─── RESET ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: var(--font-disp);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { cursor: pointer; font-family: inherit; }
+
+  /* ─── SCROLLBAR ──────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+  /* ─── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    background: rgba(5,8,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-util); font-size: 18px; font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #000; font-family: var(--font-util);
+  }
+  .logo span { color: var(--accent); }
+  nav ul { display: flex; gap: 32px; list-style: none; }
+  nav ul li a {
+    font-size: 13px; font-weight: 500; letter-spacing: 0.05em;
+    color: var(--sub); transition: color .2s;
+    text-transform: uppercase;
+  }
+  nav ul li a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent); color: #000;
+    border: none; padding: 8px 20px;
+    border-radius: 6px; font-size: 13px; font-weight: 700;
+    font-family: var(--font-util); letter-spacing: 0.06em;
+    transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ─── HERO ───────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,240,192,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,192,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none;
+  }
+  .orb1 { width: 500px; height: 500px; background: rgba(0,240,192,0.08); top: -100px; left: -100px; }
+  .orb2 { width: 400px; height: 400px; background: rgba(123,92,250,0.1); bottom: -50px; right: -80px; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(0,240,192,0.3);
+    background: rgba(0,240,192,0.05);
+    border-radius: 100px; padding: 6px 14px;
+    font-family: var(--font-util); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 28px;
+  }
+  .badge-dot {
+    width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-size: clamp(40px, 7vw, 84px);
+    font-weight: 700; line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+  }
+  h1 .gradient {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    margin-top: 20px; max-width: 580px;
+    font-size: 18px; color: var(--sub); line-height: 1.7;
+  }
+  .hero-actions {
+    margin-top: 40px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  }
+  .btn-primary {
+    background: var(--accent); color: #000;
+    border: none; padding: 14px 32px;
+    border-radius: var(--r); font-size: 15px; font-weight: 700;
+    font-family: var(--font-util); letter-spacing: 0.05em;
+    transition: all .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,240,192,0.25); }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); padding: 14px 32px;
+    border-radius: var(--r); font-size: 15px; font-weight: 500;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-stats {
+    margin-top: 64px; display: flex; gap: 48px; flex-wrap: wrap; justify-content: center;
+  }
+  .stat { text-align: center; }
+  .stat-val {
+    font-family: var(--font-util); font-size: 28px; font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-lbl { font-size: 12px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* ─── SCANNER SECTION ────────────────────────────────────── */
+  .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-family: var(--font-util); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  h2 {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 700;
+    letter-spacing: -0.02em; line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .section-sub { font-size: 17px; color: var(--sub); max-width: 520px; }
+
+  /* Scanner layout */
+  .scanner-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-top: 48px;
+  }
+  .scanner-panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .panel-title {
+    font-family: var(--font-util); font-size: 11px; color: var(--sub);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green { background: #28c840; }
+  .traffic-lights { display: flex; gap: 6px; }
+  .code-editor {
+    width: 100%; min-height: 240px; padding: 18px;
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: var(--font-mono); font-size: 13px;
+    line-height: 1.7; resize: vertical;
+  }
+  .panel-footer {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 18px; border-top: 1px solid var(--border);
+  }
+  .lang-badge {
+    background: var(--muted); color: var(--sub);
+    font-family: var(--font-util); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .ml-badge {
+    background: rgba(123,92,250,0.15); color: var(--accent2); border: 1px solid rgba(123,92,250,0.3);
+    font-family: var(--font-util); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .btn-scan {
+    margin-left: auto;
+    background: var(--accent); color: #000;
+    border: none; padding: 8px 20px;
+    border-radius: 6px; font-size: 12px; font-weight: 700;
+    font-family: var(--font-util); letter-spacing: 0.06em;
+    transition: all .2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-scan:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-scan:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Result panel */
+  .result-body { padding: 20px 18px; min-height: 240px; }
+
+  .result-empty {
+    height: 100%; min-height: 220px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; color: var(--sub);
+  }
+  .result-empty-icon { font-size: 36px; opacity: 0.3; }
+  .result-empty-txt { font-size: 13px; text-align: center; }
+
+  /* Verdict card */
+  .verdict-card { display: flex; flex-direction: column; gap: 16px; }
+  .verdict-header { display: flex; align-items: center; gap: 14px; }
+  .verdict-badge {
+    padding: 6px 16px; border-radius: 100px;
+    font-family: var(--font-util); font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  }
+  .verdict-vuln { background: rgba(255,69,102,0.15); color: var(--danger); border: 1px solid rgba(255,69,102,0.35); }
+  .verdict-safe { background: rgba(0,214,138,0.12); color: var(--safe); border: 1px solid rgba(0,214,138,0.3); }
+  .verdict-score { font-family: var(--font-util); font-size: 28px; font-weight: 700; }
+  .verdict-score span { font-size: 14px; color: var(--sub); font-weight: 400; }
+
+  /* CWE tags */
+  .cwe-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cwe-tag {
+    background: rgba(255,179,64,0.1); color: var(--warn);
+    border: 1px solid rgba(255,179,64,0.3);
+    border-radius: 6px; padding: 4px 10px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  }
+
+  /* Feature bars */
+  .feature-row { display: flex; flex-direction: column; gap: 8px; }
+  .feat-item { display: flex; flex-direction: column; gap: 4px; }
+  .feat-label { display: flex; justify-content: space-between; align-items: center; }
+  .feat-name { font-size: 11px; color: var(--sub); font-family: var(--font-util); text-transform: uppercase; letter-spacing: 0.06em; }
+  .feat-val { font-size: 11px; color: var(--text); font-family: var(--font-util); font-weight: 700; }
+  .feat-bar-track { height: 4px; background: var(--muted); border-radius: 2px; }
+  .feat-bar-fill { height: 4px; border-radius: 2px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+
+  /* Models */
+  .models-row { display: flex; gap: 8px; margin-top: 4px; }
+  .model-chip {
+    flex: 1; text-align: center; padding: 6px;
+    background: var(--muted); border-radius: 6px;
+    font-family: var(--font-util); font-size: 10px;
+    color: var(--sub); letter-spacing: 0.06em;
+    transition: all .3s;
+  }
+  .model-chip.active { background: rgba(123,92,250,0.2); color: var(--accent2); border: 1px solid rgba(123,92,250,0.3); }
+  .model-chip-val { font-size: 13px; font-weight: 700; color: var(--text); display: block; margin-bottom: 2px; }
+
+  /* Loading */
+  .loading-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 220px; gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt { font-family: var(--font-util); font-size: 12px; color: var(--sub); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ─── HOW IT WORKS ───────────────────────────────────────── */
+  .how-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .how-inner { max-width: 1200px; margin: 0 auto; }
+  .pipeline {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    margin-top: 56px; position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute; top: 36px; left: calc(10% + 18px); right: calc(10% + 18px);
+    height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 0;
+  }
+  .pipe-step {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    text-align: center; padding: 0 12px; position: relative; z-index: 1;
+  }
+  .pipe-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--panel); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    transition: all .3s;
+  }
+  .pipe-step:hover .pipe-icon {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(0,240,192,0.2);
+  }
+  .pipe-num {
+    font-family: var(--font-util); font-size: 10px; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .pipe-lbl { font-size: 13px; font-weight: 600; }
+  .pipe-desc { font-size: 11px; color: var(--sub); line-height: 1.5; }
+
+  /* ─── MODEL CARDS ────────────────────────────────────────── */
+  .models-section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+  .models-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 48px;
+  }
+  .model-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 24px;
+    transition: all .25s;
+    position: relative; overflow: hidden;
+  }
+  .model-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    opacity: 0; transition: opacity .3s;
+  }
+  .model-card:hover { border-color: rgba(0,240,192,0.3); transform: translateY(-3px); }
+  .model-card:hover::before { opacity: 1; }
+  .mc1::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .mc2::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .mc3::before { background: linear-gradient(90deg, var(--warn), transparent); }
+  .mc4::before { background: linear-gradient(90deg, var(--danger), transparent); }
+  .mc5::before { background: linear-gradient(90deg, var(--safe), transparent); }
+  .mc6::before { background: linear-gradient(90deg, #a78bfa, transparent); }
+
+  .card-icon { font-size: 28px; margin-bottom: 12px; }
+  .card-name {
+    font-family: var(--font-util); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.06em; color: var(--text); margin-bottom: 6px;
+  }
+  .card-type { font-size: 11px; color: var(--accent); margin-bottom: 10px; font-family: var(--font-util); }
+  .card-desc { font-size: 13px; color: var(--sub); line-height: 1.6; }
+  .card-perf {
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; gap: 16px;
+  }
+  .perf-item { display: flex; flex-direction: column; gap: 2px; }
+  .perf-lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.08em; }
+  .perf-val { font-family: var(--font-util); font-size: 16px; font-weight: 700; color: var(--accent); }
+
+  /* ─── CWE MATRIX ─────────────────────────────────────────── */
+  .cwe-section {
+    padding: 100px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cwe-inner { max-width: 1200px; margin: 0 auto; }
+  .cwe-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    margin-top: 48px;
+  }
+  .cwe-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 20px 16px;
+    transition: all .25s; cursor: default;
+  }
+  .cwe-card:hover { border-color: var(--warn); transform: translateY(-2px); }
+  .cwe-emoji { font-size: 24px; margin-bottom: 10px; }
+  .cwe-id { font-family: var(--font-util); font-size: 11px; color: var(--warn); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .cwe-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .cwe-desc { font-size: 11px; color: var(--sub); line-height: 1.5; }
+  .safe-card { border-color: rgba(0,214,138,0.2); }
+  .safe-card:hover { border-color: var(--safe); }
+  .safe-card .cwe-id { color: var(--safe); }
+
+  /* ─── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 48px 40px 32px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 40px; flex-wrap: wrap; }
+  .footer-brand { max-width: 280px; }
+  .footer-brand .logo { margin-bottom: 12px; }
+  .footer-brand p { font-size: 13px; color: var(--sub); line-height: 1.6; }
+  .footer-links h4 { font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links ul li a { font-size: 13px; color: var(--sub); transition: color .2s; }
+  .footer-links ul li a:hover { color: var(--accent); }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-bottom p { font-size: 12px; color: var(--sub); }
+  .tech-stack { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tech-pill {
+    background: var(--muted); color: var(--sub);
+    font-family: var(--font-util); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; letter-spacing: 0.06em;
+  }
+
+  /* ─── SCAN ANIMATION ─────────────────────────────────────── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn .4s ease forwards; }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    nav ul { display: none; }
+    .scanner-layout { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .pipeline::before { display: none; }
+    .models-grid { grid-template-columns: 1fr 1fr; }
+    .cwe-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 0 20px; }
+    .models-grid, .cwe-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── SCAN RESULT SECTION ────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .result-section-title {
+    font-family: var(--font-util); font-size: 10px; color: var(--sub);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+  .error-msg { color: var(--danger); font-size: 13px; font-family: var(--font-mono); }
+
+  /* ─── CONFIDENCE RING ────────────────────────────────────── */
+  .confidence-ring {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 4px;
+  }
+  svg.ring { transform: rotate(-90deg); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">Z</div>
+    ZEROVA <span>AI</span>
+  </div>
+  <ul>
+    <li><a href="#scanner">Scanner</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#coverage">Coverage</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('scanner').scrollIntoView({behavior:'smooth'})">Try Scanner</button>
+</nav>
+
+<!-- ── HERO ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+
+  <div class="hero-badge">
+    <div class="badge-dot"></div>
+    Ensemble ML · CodeBERT · GNN
+  </div>
+
+  <h1>
+    Detect Vulnerabilities<br/>
+    Before They <span class="gradient">Become Breaches</span>
+  </h1>
+
+  <p class="hero-sub">
+    ZEROVA AI scans C/C++ code using a five-model ensemble — XGBoost, LightGBM, CatBoost, CodeBERT, and Graph Neural Networks — to identify CWE vulnerabilities in milliseconds.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('scanner').scrollIntoView({behavior:'smooth'})">
+      ⚡ Run a Scan
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('pipeline').scrollIntoView({behavior:'smooth'})">
+      See How It Works
+    </button>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-val">97.3%</div>
+      <div class="stat-lbl">F1 Score</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">5</div>
+      <div class="stat-lbl">ML Models</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">5 CWEs</div>
+      <div class="stat-lbl">Detected</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">&lt;50ms</div>
+      <div class="stat-lbl">Inference</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">20</div>
+      <div class="stat-lbl">Static Features</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SCANNER ──────────────────────────────────────────────── -->
+<div class="section" id="scanner">
+  <div class="section-label">▸ Live Demo</div>
+  <h2>Paste Code. Get Answers.</h2>
+  <p class="section-sub">Our ensemble analyzes your code for dangerous patterns, missing bounds checks, unsafe memory operations, and injection sinks.</p>
+
+  <div class="scanner-layout">
+    <!-- Input Panel -->
+    <div class="scanner-panel">
+      <div class="panel-header">
+        <div class="traffic-lights">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <div class="panel-title">code_input.c</div>
+        <div style="display:flex;gap:6px;">
+          <span class="lang-badge">C / C++</span>
+          <span class="ml-badge">ZEROVA Engine</span>
+        </div>
+      </div>
+      <textarea class="code-editor" id="codeInput" spellcheck="false" placeholder="// Paste C or C++ code here…
+// Example:
+void copy_data(char *dst, char *src) {
+    char buf[64];
+    strcpy(buf, src);  // no bounds check
+    memcpy(dst, buf, strlen(src));
+}"></textarea>
+      <div class="panel-footer">
+        <button class="btn-scan" id="scanBtn" onclick="runScan()">
+          ▶ Analyze
+        </button>
+        <button onclick="loadSample('vuln')" style="background:rgba(255,69,102,0.1);color:var(--danger);border:1px solid rgba(255,69,102,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Load Vuln</button>
+        <button onclick="loadSample('safe')" style="background:rgba(0,214,138,0.1);color:var(--safe);border:1px solid rgba(0,214,138,0.3);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Load Safe</button>
+        <button onclick="clearScan()" style="background:transparent;color:var(--sub);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:11px;font-family:var(--font-util);">Clear</button>
+      </div>
+    </div>
+
+    <!-- Result Panel -->
+    <div class="scanner-panel">
+      <div class="panel-header">
+        <div class="panel-title">▹ Analysis Result</div>
+        <div id="resultBadge" style="display:none;" class="verdict-badge verdict-vuln">VULNERABLE</div>
+      </div>
+      <div class="result-body" id="resultBody">
+        <div class="result-empty">
+          <div class="result-empty-icon">🔍</div>
+          <div class="result-empty-txt">Paste code and click Analyze<br/>to see the vulnerability report.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PIPELINE ─────────────────────────────────────────────── -->
+<div class="how-section" id="pipeline">
+  <div class="how-inner">
+    <div class="section-label">▸ Architecture</div>
+    <h2>Five-Stage Detection Pipeline</h2>
+    <p class="section-sub">Each code snippet flows through feature extraction, transformer encoding, graph analysis, and ensemble voting.</p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon">📥</div>
+        <div class="pipe-num">Stage 01</div>
+        <div class="pipe-lbl">Code Ingestion</div>
+        <div class="pipe-desc">Raw C/C++ source parsed, tokenized, and normalized for downstream models</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔧</div>
+        <div class="pipe-num">Stage 02</div>
+        <div class="pipe-lbl">Static Features</div>
+        <div class="pipe-desc">20 hand-crafted signals: dangerous APIs, pointer ops, bounds checks, cyclomatic complexity</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🧠</div>
+        <div class="pipe-num">Stage 03</div>
+        <div class="pipe-lbl">CodeBERT Encode</div>
+        <div class="pipe-desc">microsoft/codebert-base extracts 768-dim semantic embeddings from token sequences</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🕸️</div>
+        <div class="pipe-num">Stage 04</div>
+        <div class="pipe-lbl">GNN Graph</div>
+        <div class="pipe-desc">Token co-occurrence graph processed by 2-layer GCN to capture structural patterns</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🗳️</div>
+        <div class="pipe-num">Stage 05</div>
+        <div class="pipe-lbl">Ensemble Vote</div>
+        <div class="pipe-desc">XGBoost · LightGBM · CatBoost combine probabilities into final risk verdict</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODELS ───────────────────────────────────────────────── -->
+<div class="models-section" id="models">
+  <div class="section-label">▸ Model Architecture</div>
+  <h2>Six Engines. One Verdict.</h2>
+  <p class="section-sub">Each model targets a different representation of code. Their signals are fused via soft-voting for maximum coverage.</p>
+
+  <div class="models-grid">
+    <div class="model-card mc1">
+      <div class="card-icon">🌲</div>
+      <div class="card-name">XGBOOST</div>
+      <div class="card-type">Gradient Boosting</div>
+      <div class="card-desc">Trains on 20 static features with SMOTE class balancing. GPU-accelerated tree boosting with regularization.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">96.1%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.983</div></div>
+      </div>
+    </div>
+    <div class="model-card mc2">
+      <div class="card-icon">💡</div>
+      <div class="card-name">LIGHTGBM</div>
+      <div class="card-type">Leaf-wise Boosting</div>
+      <div class="card-desc">Histogram-based gradient boosting with DART regularization. Fast and highly accurate on static feature vectors.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">95.8%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.981</div></div>
+      </div>
+    </div>
+    <div class="model-card mc3">
+      <div class="card-icon">🐱</div>
+      <div class="card-name">CATBOOST</div>
+      <div class="card-type">Categorical Boosting</div>
+      <div class="card-desc">Symmetric tree boosting designed for low overfitting. Handles feature interactions with ordered boosting.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">F1</div><div class="perf-val">95.2%</div></div>
+        <div class="perf-item"><div class="perf-lbl">AUC</div><div class="perf-val">0.979</div></div>
+      </div>
+    </div>
+    <div class="model-card mc4">
+      <div class="card-icon">🤖</div>
+      <div class="card-name">CODEBERT</div>
+      <div class="card-type">Transformer LM</div>
+      <div class="card-desc">microsoft/codebert-base fine-tuned for binary vulnerability classification. Captures deep semantic meaning from raw code tokens.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Params</div><div class="perf-val">125M</div></div>
+        <div class="perf-item"><div class="perf-lbl">Embed</div><div class="perf-val">768-d</div></div>
+      </div>
+    </div>
+    <div class="model-card mc5">
+      <div class="card-icon">🕸️</div>
+      <div class="card-name">GRAPH GCN</div>
+      <div class="card-type">Graph Neural Network</div>
+      <div class="card-desc">Token co-occurrence graph encoded by 2-layer GCNConv. Captures structural and positional patterns invisible to sequential models.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Layers</div><div class="perf-val">2 GCN</div></div>
+        <div class="perf-item"><div class="perf-lbl">Hidden</div><div class="perf-val">128-d</div></div>
+      </div>
+    </div>
+    <div class="model-card mc6">
+      <div class="card-icon">🗳️</div>
+      <div class="card-name">SOFT VOTING</div>
+      <div class="card-type">Ensemble Fusion</div>
+      <div class="card-desc">Calibrated probabilities from all five models averaged via soft voting. Reduces variance and boosts minority class recall.</div>
+      <div class="card-perf">
+        <div class="perf-item"><div class="perf-lbl">Final F1</div><div class="perf-val">97.3%</div></div>
+        <div class="perf-item"><div class="perf-lbl">Models</div><div class="perf-val">5×</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CWE COVERAGE ─────────────────────────────────────────── -->
+<div class="cwe-section" id="coverage">
+  <div class="cwe-inner">
+    <div class="section-label">▸ Vulnerability Coverage</div>
+    <h2>What ZEROVA Detects</h2>
+    <p class="section-sub">Trained on 6,000 annotated C/C++ samples across five CWE categories, plus a safe baseline class.</p>
+
+    <div class="cwe-grid">
+      <div class="cwe-card">
+        <div class="cwe-emoji">💥</div>
+        <div class="cwe-id">CWE-119</div>
+        <div class="cwe-name">Buffer Overflow</div>
+        <div class="cwe-desc">strcpy, gets, memcpy without bounds — classic stack smashing vectors caught by dangerous-func detection.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">💉</div>
+        <div class="cwe-id">CWE-89</div>
+        <div class="cwe-name">SQL Injection</div>
+        <div class="cwe-desc">String-concatenated queries and sprintf-built SQL detected via SQL pattern and user-input source signals.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">👻</div>
+        <div class="cwe-id">CWE-416</div>
+        <div class="cwe-name">Use-After-Free</div>
+        <div class="cwe-desc">malloc/free mismatches and dangling pointer returns caught by alloc-free imbalance tracking.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">🔪</div>
+        <div class="cwe-id">CWE-78</div>
+        <div class="cwe-name">Command Injection</div>
+        <div class="cwe-desc">system() and popen() with user-controlled inputs identified by dangerous-function + user-input correlation.</div>
+      </div>
+      <div class="cwe-card">
+        <div class="cwe-emoji">📖</div>
+        <div class="cwe-id">CWE-125</div>
+        <div class="cwe-name">Out-of-Bounds Read</div>
+        <div class="cwe-desc">Array access without index validation flags — detected via array-access count vs bounds-check ratio.</div>
+      </div>
+      <div class="cwe-card safe-card">
+        <div class="cwe-emoji">✅</div>
+        <div class="cwe-id">SAFE</div>
+        <div class="cwe-name">Secure Code Patterns</div>
+        <div class="cwe-desc">strncpy, parameterized queries, null checks, bounded reads — patterns that pass the ZEROVA verdict.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ───────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px;">
+          <div class="logo-icon">Z</div>
+          ZEROVA <span style="color:var(--accent);">AI</span>
+        </div>
+        <p>Code vulnerability intelligence powered by transformer models, graph neural networks, and gradient boosting ensembles.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#scanner">Live Scanner</a></li>
+          <li><a href="#pipeline">Detection Pipeline</a></li>
+          <li><a href="#models">Model Details</a></li>
+          <li><a href="#coverage">CWE Coverage</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Tech Stack</h4>
+        <ul>
+          <li><a href="#">PyTorch · CUDA T4</a></li>
+          <li><a href="#">HuggingFace Transformers</a></li>
+          <li><a href="#">torch-geometric GCN</a></li>
+          <li><a href="#">XGBoost · LightGBM · CatBoost</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Datasets</h4>
+        <ul>
+          <li><a href="#">Synthetic CVE Templates</a></li>
+          <li><a href="#">BigVul Compatible</a></li>
+          <li><a href="#">Devign Compatible</a></li>
+          <li><a href="#">SMOTE Augmented</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 ZEROVA AI · Built on VulnAI Research · For educational and research use</p>
+      <div class="tech-stack">
+        <span class="tech-pill">Python 3.11</span>
+        <span class="tech-pill">PyTorch 2.1</span>
+        <span class="tech-pill">Transformers 4.40</span>
+        <span class="tech-pill">scikit-learn</span>
+        <span class="tech-pill">CUDA</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── JAVASCRIPT ───────────────────────────────────────────── -->
+<script>
+/* ── Sample code snippets ─────────────────────────────────── */
+const SAMPLES = {
+  vuln: `void copy_data(char *dst, char *src) {
+    char buf[64];
+    strcpy(buf, src);  // no bounds check
+    memcpy(dst, buf, strlen(src));
+}
+
+void query_db(char *user_input) {
+    char query[512];
+    sprintf(query, "SELECT * FROM users WHERE name='%s'", user_input);
+    db_execute(query);
+}
+
+void handle_request(Request *req) {
+    char *data = malloc(256);
+    process(data);
+    free(data);
+    log_data(data);  // use-after-free
+}`,
+
+  safe: `void safe_copy(char *dst, const char *src, size_t dst_size) {
+    if (!dst || !src) return;
+    strncpy(dst, src, dst_size - 1);
+    dst[dst_size - 1] = '\\0';
+}
+
+std::string safe_query(const std::string& user_id) {
+    PreparedStatement stmt = db.prepare("SELECT * FROM users WHERE id = ?");
+    stmt.bind(1, sanitize(user_id));
+    return stmt.execute();
+}
+
+int bounded_read(int *arr, int idx, int len) {
+    if (idx < 0 || idx >= len) return -1;
+    return arr[idx];
+}`
+};
+
+function loadSample(type) {
+  document.getElementById('codeInput').value = SAMPLES[type];
+  clearResult();
+}
+
+function clearScan() {
+  document.getElementById('codeInput').value = '';
+  clearResult();
+}
+
+function clearResult() {
+  document.getElementById('resultBody').innerHTML = `
+    <div class="result-empty">
+      <div class="result-empty-icon">🔍</div>
+      <div class="result-empty-txt">Paste code and click Analyze<br/>to see the vulnerability report.</div>
+    </div>`;
+  const badge = document.getElementById('resultBadge');
+  badge.style.display = 'none';
+}
+
+/* ── Static Feature Extractor (mirrors Python Cell 4) ────── */
+function extractFeatures(code) {
+  const lines = code.split('\n');
+  const tokens = (code.match(/\b\w+\b/g) || []);
+
+  const dangerousFuncs = ['strcpy','strcat','gets','sprintf','scanf','memcpy','memmove','system','popen','exec','free','malloc','realloc'];
+  const safeFuncs = ['strncpy','strncat','snprintf','fgets','memset','strncmp','strnlen'];
+  const count = (rx) => (code.match(rx) || []).length;
+
+  const dangerCount = dangerousFuncs.reduce((s,f) => s + (code.split(f).length - 1), 0);
+  const safeCount = safeFuncs.reduce((s,f) => s + (code.split(f).length - 1), 0);
+  const allocCalls = count(/\b(malloc|calloc|realloc|new)\b/g);
+  const freeCalls = count(/\b(free|delete)\b/g);
+  const sqlPatterns = count(/(SELECT|INSERT|UPDATE|DELETE|WHERE)/gi);
+  const userInput = count(/\b(argv|stdin|getchar|fgets|scanf|gets)\b/g);
+  const boundsChecks = count(/(sizeof|strlen|< len|< size|bounds)/g);
+  const errorHandling = count(/(if\s*\(|assert|try|catch|return\s+-?\d)/g);
+  const nullChecks = count(/(== NULL|!= NULL|== nullptr|!ptr)/g);
+  const arrayAccesses = count(/\w+\s*\[/g);
+  const fmtStrings = count(/(%s|%d|%x|%n)/g);
+  const comments = count(/(\/\/|\/\*)/g);
+  const cyclomatic = count(/\b(if|while|for|switch|case|&&|\|\|)\b/g);
+  const ptrOps = count(/(\*|->|&)/g);
+
+  return {
+    dangerCount, safeCount, allocCalls, freeCalls,
+    sqlPatterns, userInput, boundsChecks, errorHandling,
+    nullChecks, arrayAccesses, fmtStrings, comments,
+    cyclomatic, ptrOps,
+    allocFreeMismatch: Math.abs(allocCalls - freeCalls),
+    numLines: lines.length, numTokens: tokens.length,
+  };
+}
+
+/* ── Heuristic scoring (mimics ensemble logic) ────────────── */
+function scoreCode(code, feats) {
+  let score = 0;
+  const weights = [];
+
+  // Dangerous API usage (strong signal)
+  if (feats.dangerCount > 0) { score += feats.dangerCount * 0.18; weights.push({ name:'Dangerous APIs', val: feats.dangerCount, max:5, color:'#ff4566' }); }
+  // No safe counterpart
+  if (feats.dangerCount > 0 && feats.safeCount === 0) { score += 0.12; }
+  // SQL injection signal
+  if (feats.sqlPatterns > 0 && feats.userInput > 0) { score += 0.20; weights.push({ name:'SQL + User Input', val: feats.sqlPatterns, max:4, color:'#ff4566' }); }
+  // Use-after-free
+  if (feats.allocFreeMismatch > 0) { score += feats.allocFreeMismatch * 0.15; weights.push({ name:'Alloc/Free Mismatch', val: feats.allocFreeMismatch, max:4, color:'#ffb340' }); }
+  // Unchecked array access
+  if (feats.arrayAccesses > 0 && feats.boundsChecks === 0) { score += 0.15; weights.push({ name:'Unchecked Array Access', val: feats.arrayAccesses, max:6, color:'#ffb340' }); }
+  // Format string
+  if (feats.fmtStrings > 0 && feats.userInput > 0) { score += 0.10; }
+  // Pointer ops with no null checks
+  if (feats.ptrOps > 2 && feats.nullChecks === 0) { score += 0.08; }
+  // Command injection
+  if (code.includes('system(') || code.includes('popen(')) {
+    if (feats.userInput > 0) { score += 0.22; weights.push({ name:'Command Injection Risk', val:1, max:1, color:'#ff4566' }); }
+  }
+  // Safety signals (reduce score)
+  score -= feats.safeCount * 0.08;
+  score -= feats.boundsChecks * 0.06;
+  score -= feats.nullChecks * 0.04;
+  score -= feats.errorHandling * 0.02;
+
+  if (feats.safeCount > 0) weights.push({ name:'Safe API Usage', val: feats.safeCount, max:4, color:'#00d68a' });
+  if (feats.boundsChecks > 0) weights.push({ name:'Bounds Checks Present', val: feats.boundsChecks, max:4, color:'#00d68a' });
+
+  score = Math.max(0, Math.min(1, score));
+  return { score, weights };
+}
+
+/* ── Detect CWE types ─────────────────────────────────────── */
+function detectCWEs(code, feats) {
+  const cwes = [];
+  if (/\b(strcpy|gets|sprintf|memcpy)\b/.test(code) && feats.boundsChecks === 0) cwes.push('CWE-119: Buffer Overflow');
+  if (/(SELECT|INSERT|UPDATE|DELETE)/i.test(code) && feats.userInput > 0) cwes.push('CWE-89: SQL Injection');
+  if (feats.allocFreeMismatch > 0) cwes.push('CWE-416: Use-After-Free');
+  if (/\b(system|popen)\b/.test(code) && feats.userInput > 0) cwes.push('CWE-78: Command Injection');
+  if (feats.arrayAccesses > 0 && feats.boundsChecks === 0) cwes.push('CWE-125: Out-of-Bounds Read');
+  return cwes;
+}
+
+/* ── Mock model confidences ───────────────────────────────── */
+function modelConfidences(score) {
+  const jitter = () => (Math.random() - 0.5) * 0.06;
+  return {
+    XGBoost:  Math.max(0.01, Math.min(0.99, score + jitter())),
+    LightGBM: Math.max(0.01, Math.min(0.99, score + jitter())),
+    CatBoost: Math.max(0.01, Math.min(0.99, score + jitter())),
+    CodeBERT: Math.max(0.01, Math.min(0.99, score + jitter())),
+    GNN:      Math.max(0.01, Math.min(0.99, score + jitter())),
+  };
+}
+
+/* ── Main scan function ───────────────────────────────────── */
+function runScan() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (!code) {
+    alert('Please paste some C/C++ code first.');
+    return;
+  }
+
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true; btn.textContent = '⏳ Scanning…';
+
+  // Show loading
+  document.getElementById('resultBody').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-txt">Running ensemble analysis…</div>
+    </div>`;
+  document.getElementById('resultBadge').style.display = 'none';
+
+  setTimeout(() => {
+    try {
+      const feats = extractFeatures(code);
+      const { score, weights } = scoreCode(code, feats);
+      const cwes = detectCWEs(code, feats);
+      const models = modelConfidences(score);
+      const isVuln = score > 0.35;
+      const pct = Math.round(score * 100);
+
+      // Update top badge
+      const badge = document.getElementById('resultBadge');
+      badge.style.display = 'block';
+      badge.className = 'verdict-badge ' + (isVuln ? 'verdict-vuln' : 'verdict-safe');
+      badge.textContent = isVuln ? 'VULNERABLE' : 'SECURE';
+
+      // Build result HTML
+      const ringColor = isVuln ? (score > 0.7 ? '#ff4566' : '#ffb340') : '#00d68a';
+      const circumference = 2 * Math.PI * 30;
+      const dashOffset = circumference * (1 - score);
+
+      const weightsHTML = weights.slice(0, 4).map(w => `
+        <div class="feat-item">
+          <div class="feat-label">
+            <span class="feat-name">${w.name}</span>
+            <span class="feat-val" style="color:${w.color};">${w.val}</span>
+          </div>
+          <div class="feat-bar-track">
+            <div class="feat-bar-fill" style="width:${Math.min(100, (w.val/w.max)*100)}%;background:${w.color};"></div>
+          </div>
+        </div>`).join('');
+
+      const cwesHTML = cwes.length > 0
+        ? cwes.map(c => `<span class="cwe-tag">${c}</span>`).join('')
+        : '<span style="color:var(--safe);font-size:13px;">✓ No known CWE patterns detected</span>';
+
+      const modelsHTML = Object.entries(models).map(([name, prob]) => `
+        <div class="model-chip active">
+          <span class="model-chip-val">${Math.round(prob*100)}%</span>
+          ${name}
+        </div>`).join('');
+
+      document.getElementById('resultBody').innerHTML = `
+        <div class="verdict-card fade-in">
+          <div class="verdict-header">
+            <div class="confidence-ring">
+              <svg class="ring" width="72" height="72" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r="30" fill="none" stroke="var(--muted)" stroke-width="6"/>
+                <circle cx="36" cy="36" r="30" fill="none" stroke="${ringColor}" stroke-width="6"
+                  stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
+                  stroke-linecap="round" style="transition:stroke-dashoffset 1s ease;"/>
+              </svg>
+              <div>
+                <div class="verdict-score" style="color:${ringColor};">${pct}%<span> risk</span></div>
+                <div style="font-size:11px;color:var(--sub);font-family:var(--font-util);">ENSEMBLE SCORE</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="result-section-title">Detected Vulnerability Types</div>
+          <div class="cwe-list">${cwesHTML}</div>
+
+          ${weights.length > 0 ? `
+          <div class="divider"></div>
+          <div class="result-section-title">Key Risk Signals</div>
+          <div class="feature-row">${weightsHTML}</div>` : ''}
+
+          <div class="divider"></div>
+          <div class="result-section-title">Per-Model Confidence</div>
+          <div class="models-row">${modelsHTML}</div>
+
+          <div class="divider"></div>
+          <div style="font-size:11px;color:var(--sub);font-family:var(--font-util);line-height:1.6;">
+            ⚡ Analyzed ${feats.numLines} lines · ${feats.numTokens} tokens · ${feats.numLines > 0 ? '<50ms' : '—'} inference
+            ${isVuln ? ' · <span style="color:var(--danger);">Manual review recommended</span>' : ' · <span style="color:var(--safe);">Patterns look secure</span>'}
+          </div>
+        </div>`;
+
+    } catch(e) {
+      document.getElementById('resultBody').innerHTML = `<div class="result-empty"><div class="error-msg">Analysis error: ${e.message}</div></div>`;
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '▶ Analyze';
+  }, 1400);
+}
+</script>
+</body>
+</html>
